@@ -11,7 +11,7 @@ CORS(app)
 # Defining a route for the home page
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('Home.html')
 
 # Defining a route for an about page
 @app.route('/about')
