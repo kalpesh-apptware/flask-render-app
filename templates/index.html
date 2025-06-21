@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Data Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .json-key {
+            color: #9f7aea;
+            font-weight: 600;
+        }
+        .json-string {
+            color: #38b2ac;
+        }
+        .json-number {
+            color: #f6ad55;
+        }
+        .json-boolean {
+            color: #f687b3;
+        }
+        .json-null {
+            color: #a0aec0;
+        }
+        
+        /* Animation for API key generation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #9f7aea;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #805ad5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-purple-700">
+                    <i class="fas fa-database mr-2"></i> JSON Data Dashboard
+                </h1>
+                <div class="flex space-x-4">
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">Manage and visualize your JSON data with ease</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - API Key Management -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- API Key Generator -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-purple-700 dark:text-purple-400 mb-4">
+                        <i class="fas fa-key mr-2"></i>API Key Management
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                            Generate a new API key to authenticate requests to the JSON submission endpoint.
+                        </p>
+                        
+                        <button id="generateKeyBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center">
+                            <i class="fas fa-plus-circle mr-2"></i> Generate New API Key
+                        </button>
+                        
+                        <div id="apiKeyContainer" class="hidden mt-4">
+                            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-white">Your new API Key:</span>
+                                    <button id="copyKeyBtn" class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                </div>
+                                <div id="apiKeyDisplay" class="font-mono text-sm bg-white dark:bg-gray-800 p-2 rounded break-all"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i> Store this key securely as it won't be shown again.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- JSON Submission Form -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-purple-700 dark:text-purple-400 mb-4">
+                        <i class="fas fa-upload mr-2"></i>Submit JSON Data
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
+                            <input type="text" id="apiKeyInput" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white" placeholder="Enter your API key">
+                        </div>
+                        
+                        <div>
+                            <label for="jsonDataInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">JSON Data</label>
+                            <textarea id="jsonDataInput" rows="8" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono text-sm" placeholder='{"example": "data"}'></textarea>
+                        </div>
+                        
+                        <button id="submitJsonBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center">
+                            <i class="fas fa-paper-plane mr-2"></i> Submit JSON
+                        </button>
+                        
+                        <div id="submitStatus" class="hidden text-center py-2 px-4 rounded-md"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - JSON Viewer -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-purple-700 dark:text-purple-400">
+                            <i class="fas fa-table mr-2"></i>JSON Data Viewer
+                        </h2>
+                        <button id="refreshDataBtn" class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center">
+                            <i class="fas fa-sync-alt mr-1"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div id="jsonViewer" class="overflow-auto max-h-[calc(100vh-200px)] border border-gray-200 dark:border-gray-700 rounded-md p-4 bg-gray-50 dark:bg-gray-700">
+                        <div id="noDataMessage" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-database text-4xl mb-2"></i>
+                            <p class="text-lg">No JSON data available</p>
+                            <p class="text-sm mt-2">Submit some JSON data to see it visualized here</p>
+                        </div>
+                        <div id="jsonDataContainer" class="hidden"></div>
+                    </div>
+                    
+                    <div class="mt-4 flex flex-wrap gap-2" id="jsonStatsContainer">
+                        <!-- Stats will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        }
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Generate API Key
+        document.getElementById('generateKeyBtn').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/generate-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate API key');
+                }
+                
+                const data = await response.json();
+                const apiKeyContainer = document.getElementById('apiKeyContainer');
+                const apiKeyDisplay = document.getElementById('apiKeyDisplay');
+                
+                apiKeyDisplay.textContent = data.api_key;
+                apiKeyContainer.classList.remove('hidden');
+                apiKeyContainer.classList.add('fade-in');
+                
+                // Copy to clipboard functionality
+                document.getElementById('copyKeyBtn').addEventListener('click', function() {
+                    navigator.clipboard.writeText(data.api_key).then(() => {
+                        const copyBtn = document.getElementById('copyKeyBtn');
+                        const originalIcon = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalIcon;
+                        }, 2000);
+                    });
+                });
+                
+                // Also populate the API key input field
+                document.getElementById('apiKeyInput').value = data.api_key;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate API key. Please try again.');
+            }
+        });
+        
+        // Submit JSON data
+        document.getElementById('submitJsonBtn').addEventListener('click', async function() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const jsonData = document.getElementById('jsonDataInput').value.trim();
+            const submitStatus = document.getElementById('submitStatus');
+            
+            if (!apiKey) {
+                submitStatus.textContent = 'Please enter an API key';
+                submitStatus.className = 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100';
+                submitStatus.classList.remove('hidden');
+                return;
+            }
+            
+            if (!jsonData) {
+                submitStatus.textContent = 'Please enter JSON data';
+                submitStatus.className = 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100';
+                submitStatus.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                // Validate JSON
+                JSON.parse(jsonData);
+            } catch (e) {
+                submitStatus.textContent = 'Invalid JSON format: ' + e.message;
+                submitStatus.className = 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100';
+                submitStatus.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/submit-json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: jsonData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+                
+                const data = await response.json();
+                submitStatus.textContent = 'JSON submitted successfully!';
+                submitStatus.className = 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100';
+                submitStatus.classList.remove('hidden');
+                
+                // Refresh the JSON viewer
+                loadJsonData();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                submitStatus.textContent = 'Error submitting JSON: ' + error.message;
+                submitStatus.className = 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100';
+                submitStatus.classList.remove('hidden');
+            }
+        });
+        
+        // Refresh JSON data
+        document.getElementById('refreshDataBtn').addEventListener('click', loadJsonData);
+        
+        // Load JSON data from server
+        async function loadJsonData() {
+            try {
+                const response = await fetch('/json-view');
+                
+                if (!response.ok) {
+                    // If no data exists yet
+                    if (response.status === 404) {
+                        document.getElementById('noDataMessage').classList.remove('hidden');
+                        document.getElementById('jsonDataContainer').classList.add('hidden');
+                        updateStats(null);
+                        return;
+                    }
+                    throw new Error('Failed to load JSON data');
+                }
+                
+                // Check if the response is HTML (from the Flask template)
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    // This is the HTML table from Flask
+                    const html = await response.text();
+                    document.getElementById('jsonDataContainer').innerHTML = html;
+                } else {
+                    // This is raw JSON data
+                    const data = await response.json();
+                    renderJson(data);
+                }
+                
+                document.getElementById('noDataMessage').classList.add('hidden');
+                document.getElementById('jsonDataContainer').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('noDataMessage').classList.remove('hidden');
+                document.getElementById('jsonDataContainer').classList.add('hidden');
+                updateStats(null);
+            }
+        }
+        
+        // Render JSON data in a more visual way
+        function renderJson(data) {
+            const container = document.getElementById('jsonDataContainer');
+            container.innerHTML = '';
+            
+            if (typeof data === 'object' && data !== null) {
+                const table = document.createElement('table');
+                table.className = 'min-w-full divide-y divide-gray-200 dark:divide-gray-600';
+                
+                const thead = document.createElement('thead');
+                thead.className = 'bg-gray-50 dark:bg-gray-700';
+                const headerRow = document.createElement('tr');
+                
+                const keyHeader = document.createElement('th');
+                keyHeader.className = 'px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider';
+                keyHeader.textContent = 'Key';
+                
+                const valueHeader = document.createElement('th');
+                valueHeader.className = 'px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider';
+                valueHeader.textContent = 'Value';
+                
+                headerRow.appendChild(keyHeader);
+                headerRow.appendChild(valueHeader);
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                const tbody = document.createElement('tbody');
+                tbody.className = 'bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700';
+                
+                for (const key in data) {
+                    const row = document.createElement('tr');
+                    
+                    const keyCell = document.createElement('td');
+                    keyCell.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-purple-700 dark:text-purple-400';
+                    keyCell.textContent = key;
+                    
+                    const valueCell = document.createElement('td');
+                    valueCell.className = 'px-6 py-4 whitespace-nowrap text-sm';
+                    
+                    if (typeof data[key] === 'object' && data[key] !== null) {
+                        valueCell.innerHTML = `<span class="text-gray-500 dark:text-gray-400">${JSON.stringify(data[key])}</span>`;
+                    } else if (typeof data[key] === 'string') {
+                        valueCell.innerHTML = `<span class="json-string">"${data[key]}"</span>`;
+                    } else if (typeof data[key] === 'number') {
+                        valueCell.innerHTML = `<span class="json-number">${data[key]}</span>`;
+                    } else if (typeof data[key] === 'boolean') {
+                        valueCell.innerHTML = `<span class="json-boolean">${data[key]}</span>`;
+                    } else if (data[key] === null) {
+                        valueCell.innerHTML = `<span class="json-null">null</span>`;
+                    } else {
+                        valueCell.textContent = data[key];
+                    }
+                    
+                    row.appendChild(keyCell);
+                    row.appendChild(valueCell);
+                    tbody.appendChild(row);
+                }
+                
+                table.appendChild(tbody);
+                container.appendChild(table);
+                
+                // Update stats
+                updateStats(data);
+            } else {
+                // Simple value display
+                container.innerHTML = `
+                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-md">
+                        <span class="json-${typeof data}">${JSON.stringify(data)}</span>
+                    </div>
+                `;
+                updateStats({ value: data });
+            }
+        }
+        
+        // Update statistics about the JSON data
+        function updateStats(data) {
+            const statsContainer = document.getElementById('jsonStatsContainer');
+            statsContainer.innerHTML = '';
+            
+            if (!data) {
+                return;
+            }
+            
+            const stats = {
+                'Total Keys': Object.keys(data).length,
+                'String Values': countValuesOfType(data, 'string'),
+                'Number Values': countValuesOfType(data, 'number'),
+                'Boolean Values': countValuesOfType(data, 'boolean'),
+                'Object Values': countValuesOfType(data, 'object'),
+                'Null Values': countNullValues(data)
+            };
+            
+            for (const [label, value] of Object.entries(stats)) {
+                if (value > 0 || label === 'Total Keys') {
+                    const statElement = document.createElement('div');
+                    statElement.className = 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-xs font-medium';
+                    statElement.innerHTML = `<span class="font-bold">${label}:</span> ${value}`;
+                    statsContainer.appendChild(statElement);
+                }
+            }
+        }
+        
+        // Helper function to count values of a specific type
+        function countValuesOfType(obj, type) {
+            let count = 0;
+            for (const key in obj) {
+                if (typeof obj[key] === type && obj[key] !== null) {
+                    count++;
+                }
+            }
+            return count;
+        }
+        
+        // Helper function to count null values
+        function countNullValues(obj) {
+            let count = 0;
+            for (const key in obj) {
+                if (obj[key] === null) {
+                    count++;
+                }
+            }
+            return count;
+        }
+        
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', loadJsonData);
+    </script>
+</body>
+</html>
